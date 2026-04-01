@@ -1,5 +1,16 @@
 import { useState } from 'react';
 
+/**
+ * Hero component that provides a URL downloader UI and triggers server-backed file downloads.
+ *
+ * Renders an input for a URL, a submit button that shows a loading state while a POST request to
+ * http://localhost:5000/api/download is in flight, and an error message area. On successful response
+ * the component converts the response into a blob, derives a filename from the `content-disposition`
+ * header (fallback `cliprr-download`), and programmatically starts a browser download. On failure it
+ * displays a user-facing error message.
+ *
+ * @returns {JSX.Element} The rendered hero section containing the downloader UI.
+ */
 export default function Hero() {
 	const [url, setUrl] = useState('');
 	const [loading, setLoading] = useState(false);

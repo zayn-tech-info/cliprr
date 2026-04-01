@@ -2,6 +2,17 @@ import fs from "fs";
 import path from "path";
 import { downloadMedia, cleanupFile } from "../utils/yt-dlp.js";
 
+/**
+ * Handle a download request for a media URL and stream the resulting file to the client.
+ *
+ * Validates the `url` from `req.body`, invokes the media download process, locates the processed file
+ * in the local `tmp` directory, sets appropriate response headers (`Content-Disposition`, `Content-Type`, `Content-Length`),
+ * and streams the file to the response. Cleans up the file after streaming completes or on stream error.
+ *
+ * Responds with:
+ * - 400 when `url` is missing or invalid,
+ * - 500 when the download fails, the processed file cannot be found, or streaming fails.
+ */
 export async function handleDownload(req, res) {
   const { url } = req.body || {};
 
