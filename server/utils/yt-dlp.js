@@ -25,6 +25,22 @@ export function downloadMedia(url) {
 		];
 
 		const ytDlp = spawn("yt-dlp", args);
+		const timeoutMs = 8 * 60 * 1000; // 8 minutes watchdog
+		const timer = setTimeout(async () => {
+			ytDlp.kill("SIGKILL");
+			try {
+				const stemPath = `${outputPath}`;
+				if (fs.existsSync(stemPath)) fs.unlinkSync(stemPath);
+				const files = fs.readdirSync(tmpDir).filter((file) => file.startsWith(path.basename(outputPath)));
+				files.forEach((file) => {
+					const full = path.join(tmpDir, file);
+					if (fs.existsSync(full)) fs.unlinkSync(full);
+				});
+			} catch (cleanupErr) {
+				// ignore cleanup errors on timeout
+			}
+			reject("Download timed out. Please try again with a shorter video or try later.");
+		}, timeoutMs);
 
 		let stderr = "";
 		ytDlp.stderr.on("data", (data) => {
@@ -32,10 +48,12 @@ export function downloadMedia(url) {
 		});
 
 		ytDlp.on("error", () => {
+			clearTimeout(timer);
 			reject("yt-dlp not found. Make sure it is installed on the server.");
 		});
 
 		ytDlp.on("close", (code) => {
+			clearTimeout(timer);
 			if (code === 0) {
 				resolve(outputPath);
 			} else {
