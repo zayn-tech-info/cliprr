@@ -277,6 +277,11 @@ a {
 	transition: background-color 0.2s ease, transform 0.08s ease;
 }
 
+.hero-download-button.loading {
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
 .hero-download-button:hover:not(:disabled) {
 	background: #d4f84e;
 }
@@ -288,6 +293,24 @@ a {
 .hero-download-button:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
+}
+
+.hero-spinner {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	margin-right: 8px;
+	border: 2px solid #0f0f0f40;
+	border-top-color: #0f0f0f;
+	border-radius: 50%;
+	animation: spin 0.7s linear infinite;
+}
+
+.hero-error {
+	margin: 8px 0 0;
+	font-size: 13px;
+	color: #ff5555;
+	text-align: center;
 }
 
 .hero-supported {
@@ -303,6 +326,15 @@ a {
 	}
 	to {
 		transform: translateX(0);
+	}
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
 	}
 }
 
