@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
-// import downloadRouter from "./routes/download.routes.js";
+import downloadRouter from "./routes/download.routes.js";
 
 dotenv.config();
 
@@ -16,8 +16,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// app.use("/api/download", downloadRouter);
+app.use("/api/download", downloadRouter);
 
 app.get("/", (_req, res) => {
   res.json({ status: "Cliprr server is running" });
