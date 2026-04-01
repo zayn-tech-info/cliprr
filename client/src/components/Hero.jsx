@@ -14,7 +14,7 @@ export default function Hero() {
 
 		try {
 			const base = (import.meta.env?.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-			const endpoint = `${base}/api/download` || '/api/download';
+			const endpoint = `${base}/api/download`;
 
 			const response = await fetch(base ? endpoint : '/api/download', {
 				method: 'POST',
@@ -50,11 +50,23 @@ export default function Hero() {
 				const writable = await handle.createWritable();
 				await response.body.pipeTo(writable);
 			} else {
-				setError('Streaming download not supported in this browser. Please use a modern Chromium-based browser.');
+				const blob = await response.blob();
+				const objectUrl = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = objectUrl;
+				link.download = filename;
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+				URL.revokeObjectURL(objectUrl);
 			}
 		} catch (err) {
-			console.error('Download request failed:', err);
-			setError('Download failed. Please try again.');
+			if (err instanceof DOMException && err.name === 'AbortError') {
+				console.info('Download cancelled by user');
+			} else {
+				console.error('Download request failed:', err);
+				setError('Download failed. Please try again.');
+			}
 		} finally {
 			setLoading(false);
 		}
