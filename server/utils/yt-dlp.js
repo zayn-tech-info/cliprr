@@ -3,6 +3,12 @@ import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 
+/**
+ * Download media from the given URL using yt-dlp and save it to a generated file in the local `tmp` directory.
+ * The downloader prefers MP4 video + M4A audio and writes to a filename based on a UUID.
+ * @param {string} url - The media URL to download.
+ * @returns {string} The generated base output path (absolute) for the downloaded file without its extension.
+ */
 export function downloadMedia(url) {
 	return new Promise((resolve, reject) => {
 		const filename = `cliprr-${uuidv4()}`;
@@ -63,6 +69,11 @@ export function downloadMedia(url) {
 	});
 }
 
+/**
+ * Delete the file at the given path if it exists; suppresses any errors.
+ *
+ * @param {string} filePath - Path to the file to remove. Errors during deletion are ignored to avoid crashing the server.
+ */
 export function cleanupFile(filePath) {
 	try {
 		if (fs.existsSync(filePath)) {
