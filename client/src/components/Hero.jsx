@@ -24,7 +24,10 @@ export default function Hero() {
 		setError('');
 
 		try {
-			const response = await fetch('http://localhost:5000/api/download', {
+			const base = (import.meta.env?.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+			const endpoint = `${base}/api/download`;
+
+			const response = await fetch(base ? endpoint : '/api/download', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ url: trimmed }),
@@ -42,7 +45,6 @@ export default function Hero() {
 				return;
 			}
 
-			const blob = await response.blob();
 			const disposition = response.headers.get('content-disposition') || '';
 			let filename = 'cliprr-download';
 			const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i);
@@ -50,17 +52,32 @@ export default function Hero() {
 				filename = match[1].replace(/['"]/g, '') || filename;
 			}
 
-			const objectUrl = URL.createObjectURL(blob);
-			const link = document.createElement('a');
-			link.href = objectUrl;
-			link.download = filename;
-			document.body.appendChild(link);
-			link.click();
-			link.remove();
-			URL.revokeObjectURL(objectUrl);
+			if (!response.body) {
+				throw new Error('No response body to stream.');
+			}
+
+			if (typeof window.showSaveFilePicker === 'function') {
+				const handle = await window.showSaveFilePicker({ suggestedName: filename });
+				const writable = await handle.createWritable();
+				await response.body.pipeTo(writable);
+			} else {
+				const blob = await response.blob();
+				const objectUrl = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = objectUrl;
+				link.download = filename;
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+				URL.revokeObjectURL(objectUrl);
+			}
 		} catch (err) {
-			console.error('Download request failed:', err);
-			setError('Download failed. Please try again.');
+			if (err instanceof DOMException && err.name === 'AbortError') {
+				console.info('Download cancelled by user');
+			} else {
+				console.error('Download request failed:', err);
+				setError('Download failed. Please try again.');
+			}
 		} finally {
 			setLoading(false);
 		}
