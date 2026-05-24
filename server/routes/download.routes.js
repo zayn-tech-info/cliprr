@@ -1,8 +1,14 @@
 import { Router } from "express";
-import { handleDownload } from "../controllers/download.controller.js";
+import {
+  handleInfo,
+  handleDownload,
+  handleCancelDownload,
+} from "../controllers/download.controller.js";
 
 const router = Router();
 
 router.post("/", handleDownload);
+router.post("/info", handleInfo);
+router.post("/cancel", handleCancelDownload);
 
 export default router;

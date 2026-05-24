@@ -8,11 +8,11 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
-    origin: "https://extroverted-ruby.outray.app",
-    hmr: {
-      protocol: "https",
-      host: "extroverted-ruby.outray.app",
-      clientPort: 443,
+    proxy: {
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
     },
   },
 });
